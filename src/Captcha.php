@@ -18,10 +18,12 @@ use function imagecreatefromjpeg;
 use function imagecreatefrompng;
 use function imagecreatefromwebp;
 use function imagedestroy;
+use function imagejpeg;
 use function imagepng;
 use function imagesetpixel;
 use function imagestring;
 use function imagettftext;
+use function imagewebp;
 use function is_string;
 use function is_subclass_of;
 use function join;
@@ -62,6 +64,8 @@ class Captcha
         'singleFont' => true,
         // 背景颜色
         'bg' => [243, 251, 254],
+        // 输出类型
+        'outputType' => self::OUTPUT_PNG,
         // 验证码加密密钥
         'secureKey' => '__SECRET__',
         // 验证码过期时间（s）
@@ -84,6 +88,10 @@ class Captcha
     private $imageH;
     /** @var float */
     private $imageW;
+
+    public const OUTPUT_PNG = 'png';
+    public const OUTPUT_JPG = 'jpg';
+    public const OUTPUT_WEBP = 'webp';
 
     /**
      * 架构方法 设置参数
@@ -320,9 +328,21 @@ class Captcha
         // 保存验证码
         $this->code = $this->codeHash($code);
 
-        ob_start();
         // 输出图像
-        imagepng($this->im);
+        ob_start();
+        switch ($this->config['outputType']) {
+            case self::OUTPUT_PNG:
+                imagepng($this->im);
+                break;
+            case self::OUTPUT_WEBP:
+                imagewebp($this->im);
+                break;
+            case self::OUTPUT_JPG:
+                imagejpeg($this->im);
+                break;
+            default:
+                throw new CaptchaException("Unsupported type: {$this->config['outputType']}");
+        }
         $this->codeContent = ob_get_clean();
         imagedestroy($this->im);
 
@@ -338,6 +358,23 @@ class Captcha
     }
 
     /**
+     * @return string
+     */
+    public function getContentMime(): string
+    {
+        switch ($this->config['outputType']) {
+            case self::OUTPUT_PNG:
+                return 'image/png';
+            case self::OUTPUT_WEBP:
+                return 'image/webp';
+            case self::OUTPUT_JPG:
+                return 'image/jpeg';
+            default:
+                throw new CaptchaException("Unsupported type: {$this->config['outputType']}");
+        }
+    }
+
+    /**
      * @param array $headers
      * @return Response
      */
@@ -345,7 +382,7 @@ class Captcha
     {
         return Response::create($this->codeContent)->header($headers + [
             'Cache-Control' => 'private, no-cache, no-store, must-revalidate',
-            'Content-Type' => 'image/png',
+            'Content-Type' => $this->getContentMime(),
             'Content-Length' => strlen($this->codeContent),
         ]);
     }
