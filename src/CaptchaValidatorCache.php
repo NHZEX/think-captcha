@@ -9,7 +9,7 @@ class CaptchaValidatorCache extends CaptchaValidatorAbstract
 {
     public function generateToken(): string
     {
-        $token = Str::random(16, 0, '0123456789');
+        $token = Str::random(32, 0, '0123456789');
 
         App::getInstance()->cache->set(
             'captcha_' . $token,
