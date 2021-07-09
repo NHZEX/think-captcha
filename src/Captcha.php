@@ -74,7 +74,7 @@ class Captcha
         'validatorClass' => CaptchaValidatorCache::class,
     ];
 
-    private $im = null; // 验证码图片实例
+    private $img = null; // 验证码图片实例
     /** @var int|null */
     private $color = null;
     /** @var string */
@@ -89,8 +89,8 @@ class Captcha
     /** @var float */
     private $imageW;
 
-    public const OUTPUT_PNG = 'png';
-    public const OUTPUT_JPG = 'jpg';
+    public const OUTPUT_PNG  = 'png';
+    public const OUTPUT_JPEG = 'jpg';
     public const OUTPUT_WEBP = 'webp';
 
     /**
@@ -153,7 +153,7 @@ class Captcha
                 $i  = (int) ($fontSize / 5);
                 while ($i > 0) {
                     // 这里(while)循环画像素点比imagettftext和imagestring用字体大小一次画出（不用这while循环）性能要好很多
-                    imagesetpixel($this->im, $px + $i, (int) ($py + $i), $this->color);
+                    imagesetpixel($this->img, $px + $i, (int) ($py + $i), $this->color);
                     $i--;
                 }
             }
@@ -169,11 +169,11 @@ class Captcha
         $codeSet = '2345678abcdefhijkmnpqrstuvwxyz';
         for ($i = 0; $i < 10; $i++) {
             //杂点颜色
-            $noiseColor = imagecolorallocate($this->im, mt_rand(150, 225), mt_rand(150, 225), mt_rand(150, 225));
+            $noiseColor = imagecolorallocate($this->img, mt_rand(150, 225), mt_rand(150, 225), mt_rand(150, 225));
             for ($j = 0; $j < 5; $j++) {
                 // 绘杂点
                 imagestring(
-                    $this->im,
+                    $this->img,
                     5,
                     mt_rand(-10, (int) $this->imageW),
                     mt_rand(-10, (int) $this->imageH),
@@ -218,7 +218,7 @@ class Captcha
         }
         [$width, $height] = @getimagesize($gbName);
         @imagecopyresampled(
-            $this->im,
+            $this->img,
             $bgImage,
             0,
             0,
@@ -264,13 +264,13 @@ class Captcha
             $this->imageH = $this->config['imageH'];
         }
         // 建立一幅 $this->imageW x $this->imageH 的图像
-        $this->im = imagecreate((int) $this->imageW, (int) $this->imageH);
+        $this->img = imagecreate((int) $this->imageW, (int) $this->imageH);
         // 设置背景
         [$bgR, $bgG, $bgB] = $this->config['bg'];
-        imagecolorallocate($this->im, $bgR, $bgG, $bgB);
+        imagecolorallocate($this->img, $bgR, $bgG, $bgB);
 
         // 验证码字体随机颜色
-        $this->color = imagecolorallocate($this->im, mt_rand(1, 150), mt_rand(1, 150), mt_rand(1, 150));
+        $this->color = imagecolorallocate($this->img, mt_rand(1, 150), mt_rand(1, 150), mt_rand(1, 150));
         // 验证码使用随机字体
         $ttfPath = $this->assetsPath . 'ttfs/';
 
@@ -313,7 +313,7 @@ class Captcha
             $code[$i] = $codeSet[mt_rand(0, strlen($codeSet) - 1)];
             $codeNX += mt_rand((int) ($fontSize * 1.2), (int) ($fontSize * 1.6));
             imagettftext(
-                $this->im,
+                $this->img,
                 $fontSize,
                 mt_rand(-40, 40),
                 $codeNX,
@@ -332,19 +332,20 @@ class Captcha
         ob_start();
         switch ($this->config['outputType']) {
             case self::OUTPUT_PNG:
-                imagepng($this->im);
+                imagepng($this->img);
                 break;
             case self::OUTPUT_WEBP:
-                imagewebp($this->im);
+                imagepalettetotruecolor($this->img);
+                imagewebp($this->img);
                 break;
-            case self::OUTPUT_JPG:
-                imagejpeg($this->im);
+            case self::OUTPUT_JPEG:
+                imagejpeg($this->img);
                 break;
             default:
                 throw new CaptchaException("Unsupported type: {$this->config['outputType']}");
         }
         $this->codeContent = ob_get_clean();
-        imagedestroy($this->im);
+        imagedestroy($this->img);
 
         return $this;
     }
@@ -367,7 +368,7 @@ class Captcha
                 return 'image/png';
             case self::OUTPUT_WEBP:
                 return 'image/webp';
-            case self::OUTPUT_JPG:
+            case self::OUTPUT_JPEG:
                 return 'image/jpeg';
             default:
                 throw new CaptchaException("Unsupported type: {$this->config['outputType']}");
