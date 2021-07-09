@@ -97,7 +97,7 @@ class Captcha
             $option = $config->get('captcha');
         }
         $this->config = array_merge($this->config, $option);
-        $this->assetsPath = __DIR__ . '/assets/';
+        $this->assetsPath = __DIR__ . '/../assets/';
     }
 
     /**
