@@ -5,7 +5,6 @@ namespace Zxin\Captcha;
 use think\Config;
 use think\Response;
 use function array_merge;
-use function array_rand;
 use function class_exists;
 use function count;
 use function dir;
@@ -16,6 +15,7 @@ use function imagecolorallocate;
 use function imagecopyresampled;
 use function imagecreate;
 use function imagecreatefromjpeg;
+use function imagecreatefrompng;
 use function imagecreatefromwebp;
 use function imagedestroy;
 use function imagepng;
@@ -29,7 +29,6 @@ use function mt_rand;
 use function ob_get_clean;
 use function ob_start;
 use function sin;
-use function str_ends_with;
 use function strlen;
 use function strtoupper;
 use function substr;
@@ -188,18 +187,21 @@ class Captcha
 
         $bgs = [];
         while (false !== ($file = $dir->read())) {
-            if ('.' != $file[0] && (str_ends_with($file, '.webp') || str_ends_with($file, '.jpg'))) {
-                $bgs[] = $path . $file;
+            $ext = explode('.', $file)[1] ?? null;
+            if ('.' != $file[0] && ('webp' === $ext || 'png' === $ext || 'jpg' === $ext)) {
+                $bgs[] = [$path . $file, $ext];
             }
         }
         $dir->close();
 
-        $gbName = $bgs[array_rand($bgs)];
+        $gb = $bgs[mt_rand(0, count($bgs) - 1)];
 
         // Resample
-        $ext = explode('.', $gbName)[1];
+        [$gbName, $ext] = $gb;
         if ('webp' === $ext) {
             $bgImage = @imagecreatefromwebp($gbName);
+        } elseif ('png' === $ext) {
+            $bgImage = @imagecreatefrompng($gbName);
         } elseif ('jpg' === $ext) {
             $bgImage = @imagecreatefromjpeg($gbName);
         }
