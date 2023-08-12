@@ -27,6 +27,7 @@ use function imagewebp;
 use function is_string;
 use function is_subclass_of;
 use function join;
+use function mt_rand;
 use function ob_get_clean;
 use function ob_start;
 use function sin;
@@ -82,7 +83,8 @@ class Captcha
     private $img; // 验证码图片实例
     /** @var int|null */
     private $color = null;
-    private ?string $code = null;
+    /** @var string */
+    private $code;
     /** @var string|null */
     private $codeContent;
     /** @var string */
@@ -127,22 +129,22 @@ class Captcha
     {
         $px = $py = 0;
 
-        $A = random_int(1, (int) ($this->imageH / 2)); // 振幅
+        $A = mt_rand(1, (int) ($this->imageH / 2)); // 振幅
 
-        $T = random_int((int) ($this->imageH), (int) ($this->imageW * 2)); // 周期
+        $T = mt_rand((int) ($this->imageH), (int) ($this->imageW * 2)); // 周期
         $w = (2 * M_PI) / $T;
 
         // 曲线前部分
-        $b = random_int(-(int) ($this->imageH / 4), (int) ($this->imageH / 4)); // Y轴方向偏移量
-        $f = random_int(-(int) ($this->imageH / 4), (int) ($this->imageH / 4)); // X轴方向偏移量
+        $b = mt_rand(-(int) ($this->imageH / 4), (int) ($this->imageH / 4)); // Y轴方向偏移量
+        $f = mt_rand(-(int) ($this->imageH / 4), (int) ($this->imageH / 4)); // X轴方向偏移量
         $px1 = 0; // 曲线横坐标起始位置
-        $px2 = random_int((int) ($this->imageW / 2), (int) ($this->imageW * 0.8)); // 曲线横坐标结束位置
+        $px2 = mt_rand((int) ($this->imageW / 2), (int) ($this->imageW * 0.8)); // 曲线横坐标结束位置
 
         $this->drawCurve($A, $px1, $px2, $w, $f, $b, $fontSize);
 
         // 曲线后部分
         $b   = $py - $A * sin($w * $px + $f) - $this->imageH / 2;
-        $f   = random_int(-(int) ($this->imageH / 4), (int) ($this->imageH / 4)); // X轴方向偏移量
+        $f   = mt_rand(-(int) ($this->imageH / 4), (int) ($this->imageH / 4)); // X轴方向偏移量
         $px1 = $px2;
         $px2 = (int) $this->imageW;
 
@@ -173,15 +175,15 @@ class Captcha
         $codeSet = '2345678abcdefhijkmnpqrstuvwxyz';
         for ($i = 0; $i < 10; $i++) {
             //杂点颜色
-            $noiseColor = imagecolorallocate($this->img, random_int(150, 225), random_int(150, 225), random_int(150, 225));
+            $noiseColor = imagecolorallocate($this->img, mt_rand(150, 225), mt_rand(150, 225), mt_rand(150, 225));
             for ($j = 0; $j < 5; $j++) {
                 // 绘杂点
                 imagestring(
                     $this->img,
                     5,
-                    random_int(-10, (int) $this->imageW),
-                    random_int(-10, (int) $this->imageH),
-                    $codeSet[random_int(0, 29)],
+                    mt_rand(-10, (int) $this->imageW),
+                    mt_rand(-10, (int) $this->imageH),
+                    $codeSet[mt_rand(0, 29)],
                     $noiseColor
                 );
             }
@@ -206,7 +208,7 @@ class Captcha
         }
         $dir->close();
 
-        $gb = $bgs[random_int(0, count($bgs) - 1)];
+        $gb = $bgs[mt_rand(0, count($bgs) - 1)];
 
         // Resample
         [$gbName, $ext] = $gb;
@@ -274,7 +276,7 @@ class Captcha
         imagecolorallocate($this->img, $bgR, $bgG, $bgB);
 
         // 验证码字体随机颜色
-        $this->color = imagecolorallocate($this->img, random_int(1, 150), random_int(1, 150), random_int(1, 150));
+        $this->color = imagecolorallocate($this->img, mt_rand(1, 150), mt_rand(1, 150), mt_rand(1, 150));
         // 验证码使用随机字体
         $ttfPath = $this->assetsPath . 'ttfs/';
 
@@ -306,7 +308,7 @@ class Captcha
         if (count($fontttfs) === 1) {
             $selected = 0;
         } elseif ($this->config['singleFont']) {
-            $selected = random_int(0, count($fontttfs) - 1);
+            $selected = mt_rand(0, count($fontttfs) - 1);
         }
 
         // 绘验证码
@@ -314,16 +316,16 @@ class Captcha
         $codeSet = $this->config['codeSet'];
         $codeNX = 0; // 验证码第N个字符的左边距
         for ($i = 0; $i < $codeLength; $i++) {
-            $code[$i] = $codeSet[random_int(0, strlen($codeSet) - 1)];
-            $codeNX += random_int((int) ($fontSize * 1.2), (int) ($fontSize * 1.6));
+            $code[$i] = $codeSet[mt_rand(0, strlen($codeSet) - 1)];
+            $codeNX += mt_rand((int) ($fontSize * 1.2), (int) ($fontSize * 1.6));
             imagettftext(
                 $this->img,
                 $fontSize,
-                random_int(-40, 40),
+                mt_rand(-40, 40),
                 $codeNX,
                 (int) ($fontSize * 1.6),
                 $this->color,
-                isset($selected) ? $fontttfs[$selected] : $fontttfs[random_int(0, count($fontttfs) - 1)],
+                isset($selected) ? $fontttfs[$selected] : $fontttfs[mt_rand(0, count($fontttfs) - 1)],
                 $code[$i]
             );
         }
