@@ -74,7 +74,7 @@ class Captcha
         'validatorClass' => CaptchaValidatorCache::class,
     ];
 
-    private $img = null; // 验证码图片实例
+    private $img; // 验证码图片实例
     /** @var int|null */
     private $color = null;
     /** @var string */

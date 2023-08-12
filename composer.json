@@ -10,10 +10,10 @@
         }
     ],
     "require": {
-        "php": "^7.2|^8.0",
+        "php": "^7.4|^8.0",
         "ext-gd": "*",
         "symfony/polyfill-php80": "^1.18",
-        "topthink/framework": "^6.0.3"
+        "topthink/framework": "^6.0.3|^8.0"
     },
     "require-dev": {
     },
