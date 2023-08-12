@@ -16,6 +16,9 @@
         "topthink/framework": "^6.0.3|^8.0"
     },
     "require-dev": {
+        "php-cs-fixer/shim": "^3.22",
+        "phpstan/phpstan": "^1.10",
+        "rector/rector": "~0.17"
     },
     "suggest": {
     },
