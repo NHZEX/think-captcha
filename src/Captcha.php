@@ -81,19 +81,13 @@ class Captcha
      * @var \GdImage|resource
      */
     private $img; // 验证码图片实例
-    /** @var int|null */
-    private $color = null;
-    /** @var string */
-    private $code;
-    /** @var string|null */
-    private $codeContent;
-    /** @var string */
-    private $assetsPath;
+    private int $color;
+    private string $code;
+    private string $codeContent;
+    private string $assetsPath;
 
-    /** @var float */
-    private $imageH;
-    /** @var float */
-    private $imageW;
+    private float $imageH;
+    private float $imageW;
 
     public const OUTPUT_PNG  = 'png';
     public const OUTPUT_JPEG = 'jpg';
@@ -356,10 +350,7 @@ class Captcha
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getContent(): ?string
+    public function getContent(): string
     {
         return $this->codeContent;
     }
