@@ -41,7 +41,10 @@ use function substr;
  */
 class Captcha
 {
-    protected $config = [
+    /**
+     * @var array<string, mixed>
+     */
+    protected array $config = [
         // 验证码字符集合
         'codeSet' => '2345678abcdefhijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXY',
         // 使用背景图片
@@ -74,6 +77,9 @@ class Captcha
         'validatorClass' => CaptchaValidatorCache::class,
     ];
 
+    /**
+     * @var \GdImage|resource
+     */
     private $img; // 验证码图片实例
     /** @var int|null */
     private $color = null;
@@ -97,7 +103,7 @@ class Captcha
      * 架构方法 设置参数
      * @access public
      * @param Config     $config
-     * @param array|null $option
+     * @param array<string, mixed>|null $option
      */
     public function __construct(Config $config, ?array $option = null)
     {
@@ -376,7 +382,7 @@ class Captcha
     }
 
     /**
-     * @param array $headers
+     * @param array<string, string> $headers
      * @return Response
      */
     public function sendResponse(array $headers = []): Response

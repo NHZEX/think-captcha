@@ -7,7 +7,7 @@ use think\helper\Str;
 
 class CaptchaValidatorCache extends CaptchaValidatorAbstract
 {
-    protected $cacheStore = null;
+    protected ?string $cacheStore = null;
 
     public function generateToken(): string
     {
