@@ -82,6 +82,7 @@ class Captcha
      */
     private $img; // 验证码图片实例
     private int $color;
+    private string $codePlaintext;
     private string $code;
     private string $codeContent;
     private string $assetsPath;
@@ -323,10 +324,10 @@ class Captcha
                 $code[$i]
             );
         }
-        $code = join('', $code);
+        $this->codePlaintext = join('', $code);
 
         // 保存验证码
-        $this->code = $this->codeHash($code);
+        $this->code = $this->codeHash($this->codePlaintext);
 
         // 输出图像
         ob_start();
@@ -395,6 +396,14 @@ class Captcha
     public function check(string $code, string $hashCode): bool
     {
         return $this->codeHash($code) === $hashCode;
+    }
+
+    /**
+     * 获取原始明文
+     */
+    public function getCodePlaintext(): string
+    {
+        return $this->codePlaintext;
     }
 
     /**
